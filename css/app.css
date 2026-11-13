@@ -81,7 +81,7 @@ details > summary::before { content: '▸ '; } details[open] > summary::before {
 /* Formulare – 16px verhindert Auto-Zoom in iOS */
 .field { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
 .field-label { color: var(--mu); font-size: 13px; }
-.inp { width: 100%; font-size: 16px; min-height: 46px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--s2); color: var(--tx); -webkit-appearance: none; appearance: none; }
+.inp { width: 100%; font-family: inherit; font-size: 16px; min-height: 46px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--s2); color: var(--tx); -webkit-appearance: none; appearance: none; }
 .inp:focus { outline: 2px solid var(--ac); outline-offset: -1px; }
 textarea.inp { min-height: 120px; resize: vertical; }
 input[type=date].inp, input[type=time].inp { display: block; min-width: 0; }
@@ -215,3 +215,11 @@ input[type=date].inp, input[type=time].inp { display: block; min-width: 0; }
 .hbar { display: grid; grid-template-columns: 64px 1fr 34px; gap: 8px; align-items: center; font-size: 13.5px; margin: 3px 0; }
 .hbar-track { height: 10px; background: var(--s3); border-radius: 5px; overflow: hidden; } .hbar-fill { height: 100%; background: var(--warn); }
 .person-row { margin: 6px 0; } .person-row .inp { flex: 1; }
+
+/* Tagebuch */
+textarea.inp.diary { min-height: 220px; font-size: 17px; line-height: 1.5; resize: none; overflow: hidden; }
+.preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; font-size: 14.5px; }
+.sub.preview { -webkit-line-clamp: 2; }
+.diary-card .big { color: var(--mu); font-size: 17px; font-weight: 500; }
+.btn.picker { position: relative; display: flex; align-items: center; justify-content: center; }
+.seg.top button { font-size: 13.5px; padding: 0 4px; }

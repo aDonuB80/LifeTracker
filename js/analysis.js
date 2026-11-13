@@ -192,7 +192,8 @@ async function renderWeek() {
       [h('span', 'Schlaf · Qualität'), h('span', sleep.length ? `${fmtDuration(mean(sleep.map((x) => x.durationMin)))} · ${f1(mean(sleep.map((x) => x.quality)))}` : '–')],
       [h('span', 'Stimmung · Stress'), h('span', `${f1(mean(days.map((x) => x.mood)))} · ${f1(mean(days.map((x) => x.stress)))}`)],
       [h('span', `⭐ ${label}`), h('span', sz.length ? `${sz.length}× · Ø ${f1(mean(sz.map((x) => x.score)))}` : '–')],
-      [h('span', 'Ereignisse'), h('span', events.length ? `${events.length}×` : '–')])),
+      [h('span', 'Ereignisse'), h('span', events.length ? `${events.length}×` : '–')],
+      [h('span', '📓 Tagebuch'), h('span', `${days.filter((x) => x.note && x.note.trim()).length} von 7 Tagen`)])),
     h('div.card', table),
     events.length > 0 && h('div.card', h('div.card-head', h('span', '👥 Ereignisse')), events.sort((a, b) => a.date.localeCompare(b.date)).map((e) =>
       h('div.list-row', h('div.grow', h('div.name', e.type), h('div.sub', labelDay(e.date, t))))) ),

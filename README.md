@@ -1,6 +1,6 @@
-# Lifetrack – private Life-Tracking-PWA (Version 0.2.1)
+# Lifetrack – private Life-Tracking-PWA (Version 0.3.0)
 
-Offline-Web-App fürs iPhone: Ernährung mit eigener Lebensmitteldatenbank und Phasen, Gewicht mit Mittelwerten und Prognose, Sport (Laufen, Bouldern, Gym), Schlaf, Stimmung und Stress, Familie & Freunde, ⭐ sowie Wochenübersicht und Trends. Alle Daten bleiben auf dem iPhone (IndexedDB). Es gibt kein Backend, kein Tracking und keine externen Abhängigkeiten.
+Offline-Web-App fürs iPhone: Ernährung mit eigener Lebensmitteldatenbank und Phasen, Gewicht mit Mittelwerten und Prognose, Sport (Laufen, Bouldern, Gym), Schlaf, Stimmung und Stress, Familie & Freunde, Tagebuch, ⭐ sowie Wochenübersicht und Trends. Alle Daten bleiben auf dem iPhone (IndexedDB). Es gibt kein Backend, kein Tracking und keine externen Abhängigkeiten.
 
 ## Dateien
 ```
@@ -8,7 +8,7 @@ index.html  manifest.webmanifest  service-worker.js
 css/app.css
 js/  app.js (Start/Navigation) · db.js (IndexedDB + Migrationen) · dates.js (Europe/Berlin)
      stats.js (Rechnen, Theil-Sen) · ui.js (Sheets/Toasts) · state.js
-     food.js · body.js · sport.js · social.js · today.js · analysis.js · charts.js · backup.js · settings.js
+     food.js · body.js · sport.js · social.js · diary.js · today.js · analysis.js · charts.js · backup.js · settings.js
 icons/  apple-touch-icon.png, icon-192/512, maskable, star.svg
 ```
 Es gibt keinen Build-Schritt. Die Dateien werden so hochgeladen, wie sie sind.

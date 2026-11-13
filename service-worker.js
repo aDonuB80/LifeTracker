@@ -1,10 +1,10 @@
 // service-worker.js – Cache-first für die App-Hülle. Version bei jeder Änderung erhöhen!
-const VERSION = 'lifetrack-v0.2.1';
+const VERSION = 'lifetrack-v0.3.0';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/db.js', './js/dates.js', './js/stats.js', './js/ui.js', './js/state.js',
   './js/food.js', './js/body.js', './js/sport.js', './js/today.js', './js/analysis.js',
-  './js/charts.js', './js/backup.js', './js/settings.js', './js/social.js',
+  './js/charts.js', './js/backup.js', './js/settings.js', './js/social.js', './js/diary.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './icons/star.svg',
 ];
 

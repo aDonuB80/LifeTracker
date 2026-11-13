@@ -55,7 +55,7 @@ const CHECK = {
   exercises: (r) => (!isStr(r.name, 200) ? 'name' : null),
   templates: (r) => (!isStr(r.name, 200) || !Array.isArray(r.exerciseIds) ? 'vorlage' : null),
   sleep: (r) => !isValidKey(r.date) ? 'date' : !isTs(r.bedTs) || !isTs(r.wakeTs) || r.wakeTs <= r.bedTs ? 'zeiten' : !is10(r.quality) ? 'quality' : null,
-  days: (r) => !isValidKey(r.date) ? 'date' : !is10(r.mood) || !is10(r.stress) ? 'skala' : null,
+  days: (r) => !isValidKey(r.date) ? 'date' : !is10(r.mood) || !is10(r.stress) ? 'skala' : r.note != null && !isStr(r.note, 50000) ? 'note' : null,
   people: (r) => (!isStr(r.name, 200) ? 'name' : null),
   events: (r) => (!isValidKey(r.date) ? 'date' : !isStr(r.type || '', 200) ? 'type' : null),
   sz: (r) => (!isValidKey(r.date) ? 'date' : !is10(r.score) ? 'score' : null),
@@ -124,7 +124,7 @@ function mergeSettings(inc) {
   return n;
 }
 
-const LABEL = { foods: 'Lebensmittel', foodLog: 'Essenseinträge', phases: 'Phasen', weights: 'Gewichtsmessungen', workouts: 'Sporteinheiten', exercises: 'Übungen', templates: 'Vorlagen', sleep: 'Schlafeinträge', days: 'Tageswerte', people: 'Personen', events: 'Ereignisse', sz: '⭐-Einträge' };
+const LABEL = { foods: 'Lebensmittel', foodLog: 'Essenseinträge', phases: 'Phasen', weights: 'Gewichtsmessungen', workouts: 'Sporteinheiten', exercises: 'Übungen', templates: 'Vorlagen', sleep: 'Schlafeinträge', days: 'Tageswerte/Tagebuch', people: 'Personen', events: 'Ereignisse', sz: '⭐-Einträge' };
 
 export async function importFile(file) {
   let obj;

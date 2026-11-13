@@ -4,6 +4,7 @@ import { state, changed, today } from './state.js';
 import { h, clear, sheet, toast, field, numInput, textInput, dateInput, timeInput, scale10, segmented, emptyState } from './ui.js';
 import { parseNum, fmt } from './stats.js';
 import { renderEvents, renderStars } from './social.js';
+import { renderDiary, openDiarySheet } from './diary.js';
 import { isValidKey, parseTime, wallToTs, timeOf, sleepTimestamps, fmtDuration, labelDay, berlinParts, addDays } from './dates.js';
 
 const nowTime = () => { const p = berlinParts(); return `${String(p.hh).padStart(2, '0')}:${String(p.mm).padStart(2, '0')}`; };
@@ -109,17 +110,17 @@ export async function openMoodSheet(dateArg) {
   sheet('Stimmung & Stress', (close) => {
     const d = dateInput(date);
     let mood = day.mood ?? null, stress = day.stress ?? null;
-    const note = textInput({ value: day.note || '', placeholder: 'optional' });
     return h('div',
       h('div.field', h('span.field-label', 'Stimmung (1 = mies, 10 = super)'), scale10(mood, (v) => { mood = v; })),
       h('div.field', h('span.field-label', 'Stress (1 = entspannt, 10 = maximal)'), scale10(stress, (v) => { stress = v; })),
-      field('Notiz zum Tag', note),
+      h('button.btn.ghost.block', { type: 'button', onclick: () => openDiarySheet(date) }, day.note ? '📓 Tagebuch zum Tag öffnen' : '📓 Gedanken zum Tag ins Tagebuch'),
       field('Datum', d),
       h('button.btn.primary.block.sticky-actions', {
         onclick: async () => {
           if (!isValidKey(d.value)) return toast('Bitte ein gültiges Datum wählen.');
-          const rec = d.value === date ? day : ((await db.get('days', d.value)) || { date: d.value });
-          Object.assign(rec, { mood, stress, note: note.value.trim() || null });
+          // frisch lesen – das Tagebuch kann den Datensatz inzwischen geändert haben
+          const rec = (await db.get('days', d.value)) || { date: d.value };
+          Object.assign(rec, { mood, stress });
           await db.put('days', rec);
           close(); changed(); toast('Gespeichert');
         },
@@ -131,7 +132,7 @@ export async function openMoodSheet(dateArg) {
 
 let sub = 'sleep';
 export async function renderLife(root) {
-  const seg = segmented([{ id: 'sleep', label: 'Schlaf' }, { id: 'mood', label: 'Befinden' }, { id: 'social', label: 'Ereignisse' }, { id: 'star', label: '⭐' }], sub, (s) => { sub = s; changed(); }, '.top');
+  const seg = segmented([{ id: 'sleep', label: 'Schlaf' }, { id: 'mood', label: 'Befinden' }, { id: 'diary', label: 'Tagebuch' }, { id: 'social', label: 'Ereignisse' }, { id: 'star', label: '⭐' }], sub, (s) => { sub = s; changed(); }, '.top');
   const t = today(), from = addDays(t, -59);
   if (sub === 'sleep') {
     const rows = (await db.range('sleep', 'date', from, t)).sort((a, b) => b.date.localeCompare(a.date));
@@ -143,14 +144,15 @@ export async function renderLife(root) {
         : emptyState('Noch keine Schlafeinträge.'));
   }
   if (sub === 'mood') {
-    const rows = (await db.range('days', null, from, t)).filter((d) => d.mood != null || d.stress != null || d.note).sort((a, b) => b.date.localeCompare(a.date));
+    const rows = (await db.range('days', null, from, t)).filter((d) => d.mood != null || d.stress != null).sort((a, b) => b.date.localeCompare(a.date));
     return clear(root, seg,
       h('button.btn.primary.block', { onclick: () => openMoodSheet() }, '＋ Stimmung/Stress eintragen'),
       rows.length ? h('div.card', rows.map((d) => h('button.list-row', { onclick: () => openMoodSheet(d.date) },
-        h('div.grow', h('div.name', labelDay(d.date, t)), d.note && h('div.sub', d.note)),
+        h('div.grow', h('div.name', labelDay(d.date, t)), d.note && h('div.sub', '📓')),
         h('div.num', `🙂 ${d.mood ?? '–'} · Stress ${d.stress ?? '–'}`))))
         : emptyState('Noch keine Einträge.'));
   }
+  if (sub === 'diary') return clear(root, seg, ...(await renderDiary()));
   if (sub === 'star') return clear(root, seg, ...(await renderStars()));
   return clear(root, seg, ...(await renderEvents()));
 }

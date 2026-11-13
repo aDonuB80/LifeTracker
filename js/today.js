@@ -9,6 +9,7 @@ import { openWeightSheet, openSleepSheet, openMoodSheet } from './body.js';
 import { openRunSheet, openBoulderSheet, openGymSheet, openWorkout, workoutSummary, TYPE_LABEL } from './sport.js';
 import { exportBackup } from './backup.js';
 import { openEventSheet, openStarSheet, peopleNames } from './social.js';
+import { openDiarySheet } from './diary.js';
 
 export function isStandalone() {
   return navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
@@ -28,6 +29,7 @@ export function openAddMenu() {
       tile('🏋️', 'Gym', () => openGymSheet()),
       tile('🙂', 'Stimmung', () => openMoodSheet()),
       tile('👥', 'Ereignis', () => openEventSheet()),
+      tile('📓', 'Tagebuch', () => openDiarySheet()),
       tile('⭐', '', () => openStarSheet()));
   });
 }
@@ -66,6 +68,10 @@ export async function renderToday(root) {
       stars.length > 0 && h('button.card.mini', { onclick: () => openStarSheet(stars.length === 1 ? stars[0] : undefined) },
         h('div.big', stars.map((s) => `⭐ ${s.score}`).join('  ')))));
   }
+
+  out.push(h('button.card.diary-card', { onclick: () => openDiarySheet(key) },
+    h('div.sub', '📓 Tagebuch'),
+    day?.note ? h('div.preview', day.note.trim().slice(0, 160)) : h('div.big', 'Gedanken festhalten')));
 
   // Backup-Erinnerung (unten, in Daumenreichweite)
   const days = lastExport ? diffDays(new Date(lastExport).toISOString().slice(0, 10), new Date().toISOString().slice(0, 10)) : null;

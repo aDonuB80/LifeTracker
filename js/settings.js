@@ -6,7 +6,7 @@ import { exportBackup, importFile } from './backup.js';
 import { parseNum, norm } from './stats.js';
 import { isStandalone } from './today.js';
 
-export const APP_VERSION = '0.2.1';
+export const APP_VERSION = '0.3.0';
 
 function openScaleEditor(sc) {
   const S = state.settings;
