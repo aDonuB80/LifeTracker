@@ -1,6 +1,6 @@
 // app.js – Einstieg: DB öffnen, Einstellungen laden, Tabs/Navigation, Service Worker.
 import * as db from './db.js';
-import { state, onChange, loadCaches, today } from './state.js';
+import { state, onChange, loadCaches, today, nav } from './state.js';
 import { h, clear, icon, toast, sheetOpen, closeTopSheet } from './ui.js';
 import { renderToday, openAddMenu } from './today.js';
 import { renderFood } from './food.js';
@@ -8,14 +8,17 @@ import { renderSport } from './sport.js';
 import { renderLife } from './body.js';
 import { renderAnalysis } from './analysis.js';
 import { renderSettings } from './settings.js';
+import { renderPlanner } from './planner.js';
 
 const TABS = [
   { id: 'today', label: 'Heute', icon: 'today', render: renderToday },
   { id: 'food', label: 'Essen', icon: 'food', render: renderFood },
   { id: 'sport', label: 'Sport', icon: 'sport', render: renderSport },
   { id: 'life', label: 'Leben', icon: 'life', render: renderLife },
+  { id: 'planner', label: 'Planer', icon: 'plan', render: renderPlanner },
   { id: 'analysis', label: 'Auswertung', icon: 'chart', render: renderAnalysis },
-  { id: 'settings', label: 'Einst.', icon: 'settings', render: renderSettings },
+  // Einstellungen: kein eigener Tab (Platz in der Tab-Leiste), erreichbar über das Zahnrad auf Heute
+  { id: 'settings', label: 'Einstellungen', icon: 'settings', render: renderSettings, hidden: true },
 ];
 let current = 'today';
 const main = document.getElementById('main');
@@ -61,7 +64,8 @@ async function init() {
   navigator.storage?.persist?.().catch(() => {});
 
   const bar = document.querySelector('.tabbar');
-  clear(bar, ...TABS.map((t) => h('button', { 'data-tab': t.id, onclick: () => switchTab(t.id), 'aria-label': t.label }, icon(t.icon), h('span', t.label))));
+  nav.go = switchTab;
+  clear(bar, ...TABS.filter((t) => !t.hidden).map((t) => h('button', { 'data-tab': t.id, onclick: () => switchTab(t.id), 'aria-label': t.label }, icon(t.icon), h('span', t.label))));
   document.getElementById('fab').addEventListener('click', openAddMenu);
 
   onChange(render);

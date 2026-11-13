@@ -12,6 +12,9 @@ export const state = {
   people: [],       // Cache Personen
 };
 
+/** Tab-Wechsel von außerhalb (z. B. Zahnrad auf Heute); wird in app.js gesetzt. */
+export const nav = { go: () => {} };
+
 const listeners = new Set();
 export const onChange = (fn) => listeners.add(fn);
 /** Nach jeder Datenänderung aufrufen → aktuelle Ansicht wird neu gezeichnet. */

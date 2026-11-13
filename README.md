@@ -1,6 +1,6 @@
-# Lifetrack – private Life-Tracking-PWA (Version 0.3.0)
+# Lifetrack – private Life-Tracking-PWA (Version 0.4.0)
 
-Offline-Web-App fürs iPhone: Ernährung mit eigener Lebensmitteldatenbank und Phasen, Gewicht mit Mittelwerten und Prognose, Sport (Laufen, Bouldern, Gym), Schlaf, Stimmung und Stress, Familie & Freunde, Tagebuch, ⭐ sowie Wochenübersicht und Trends. Alle Daten bleiben auf dem iPhone (IndexedDB). Es gibt kein Backend, kein Tracking und keine externen Abhängigkeiten.
+Offline-Web-App fürs iPhone: Ernährung mit eigener Lebensmitteldatenbank und Phasen, Gewicht mit Mittelwerten und Prognose, Sport (Laufen, Bouldern, Gym), Schlaf, Stimmung und Stress, Familie & Freunde, Tagebuch, Termine und Todos (auch wöchentlich/monatlich wiederkehrend), ⭐ sowie Wochenübersicht und Trends. Alle Daten bleiben auf dem iPhone (IndexedDB). Es gibt kein Backend, kein Tracking und keine externen Abhängigkeiten.
 
 ## Dateien
 ```
@@ -8,7 +8,7 @@ index.html  manifest.webmanifest  service-worker.js
 css/app.css
 js/  app.js (Start/Navigation) · db.js (IndexedDB + Migrationen) · dates.js (Europe/Berlin)
      stats.js (Rechnen, Theil-Sen) · ui.js (Sheets/Toasts) · state.js
-     food.js · body.js · sport.js · social.js · diary.js · today.js · analysis.js · charts.js · backup.js · settings.js
+     food.js · body.js · sport.js · social.js · diary.js · planner.js · today.js · analysis.js · charts.js · backup.js · settings.js
 icons/  apple-touch-icon.png, icon-192/512, maskable, star.svg
 ```
 Es gibt keinen Build-Schritt. Die Dateien werden so hochgeladen, wie sie sind.
@@ -39,7 +39,7 @@ Es gibt keinen Build-Schritt. Die Dateien werden so hochgeladen, wie sie sind.
 3. Die App online öffnen. Es erscheint „Neue Version verfügbar", dann auf **Aktualisieren** tippen. Alternativ in den Einstellungen „Nach Update suchen" wählen.
 
 ## 5. Backup
-- Unter **Einstellungen → Exportieren / Teilen** öffnet sich das iOS-Teilen-Menü. Dort **„In Dateien sichern"** wählen, am besten in iCloud Drive.
+- Unter **Einstellungen (⚙️ oben auf „Heute") → Exportieren / Teilen** öffnet sich das iOS-Teilen-Menü. Dort **„In Dateien sichern"** wählen, am besten in iCloud Drive.
 - **Importieren** prüft die Datei vollständig, bevor etwas geschrieben wird. Danach hast du zwei Möglichkeiten:
   - **Zusammenführen:** Vorhandene Daten bleiben. Gibt es einen Eintrag in beiden Datenbeständen, gewinnt die neuere Version.
   - **Alles ersetzen:** Alle Daten werden durch das Backup ersetzt.
@@ -65,7 +65,7 @@ Es gibt keinen Build-Schritt. Die Dateien werden so hochgeladen, wie sie sind.
 | **App löschen = Daten weg** (eigener Speicher pro Web-App) | Backup-Erinnerung, Export ins Teilen-Menü, Wiederherstellungstest in der Checkliste |
 | **Speicher-Eviction:** Safari kann bei Speichermangel oder langer Nichtnutzung Daten löschen | `navigator.storage.persist()` beim Start, Status in den Einstellungen. Installierte Home-Bildschirm-Apps sind von der 7-Tage-Löschregel für Websites ausgenommen. Restrisiko → Backups |
 | **Safari-Tab und Home-App getrennt** | Warnbanner im Tab |
-| **Keine Push-Erinnerungen offline** | Die Backup-Erinnerung erscheint nur beim Öffnen der App |
+| **Keine Push-Erinnerungen offline** | Backup-Erinnerung, heutige Termine und fällige Todos erscheinen nur beim Öffnen der App auf „Heute“. Wer Alarme braucht, trägt wichtige Termine zusätzlich im iPhone-Kalender ein |
 | **Kein Zugriff auf Apple Health** | Gewicht, Schlaf und Läufe werden manuell erfasst |
 | **Pausen-Timer** | Keine Vibration in Safari. Der Ton ist abhängig vom Stummschalter. Der Timer läuft nicht im Hintergrund weiter, rechnet aber nach Rückkehr korrekt nach |
 | **Tastatur über Bottom-Sheets** | Die Sheets passen ihre Höhe an die Tastatur an (visualViewport). Bitte auf dem Gerät testen |
@@ -87,8 +87,13 @@ Alles Persönliche kommt per Import-Datei aufs iPhone, auch eigene Boulder-Skale
 ```
 Beim Import **„Zusammenführen"** wählen. „Alles ersetzen" würde mit so einer Datei ohne Daten alle Einträge löschen. Die Skalen lassen sich alternativ auch direkt in der App unter Einstellungen anlegen.
 
+## Planer: Termine und Todos
+- Tab **Planer**, Einstellungen über das ⚙️ oben auf „Heute“. Damit bleibt die Tab-Leiste bei sechs Einträgen.
+- **Wiederkehrende Todos:** Beim Abhaken springt das Todo auf den nächsten Termin nach dem späteren von Fälligkeit und heute. Verpasste Wiederholungen stauen sich nicht auf, die Erledigungen stehen in der Historie. Monatlich am 29.–31. bedeutet in kürzeren Monaten: am letzten Tag.
+- „Heute“ zeigt die Termine des Tages und alle fälligen oder überfälligen Todos, mit Abhaken direkt dort.
+
 ## Technische Notizen
 - Datumslogik ist fest auf Europe/Berlin über `Intl` ausgelegt, unabhängig von der Geräte-Zeitzone. Tage werden als `YYYY-MM-DD` gespeichert, Zeitpunkte als epoch-ms. Das ist sommerzeitfest und getestet.
 - Gewichtsprognose: Theil-Sen über 14 oder 28 Tage, Band aus dem 10.–90. Perzentil der Paarsteigungen. Unter 7 Messtagen gibt es keine Prognose.
-- Schema-Version 1. Neue Felder kommen als `MIGRATIONS[n]` in `db.js` dazu, für alte Exporte als `RECORD_MIGRATIONS[n]`.
+- Schema-Version 2 (v2 ergänzt die Stores `appointments` und `todos`; Migration beim ersten Start, getestet von 0.3.0 → 0.4.0). Exporte mit Schema 1 lassen sich weiter importieren. Neue Felder kommen als `MIGRATIONS[n]` in `db.js` dazu, für alte Exporte als `RECORD_MIGRATIONS[n]`.
 - Performance-Test mit 3 Jahren Daten (9 900 Essenseinträge, 1 100 Gewichte): Jeder Tab baut sich in unter 200 ms auf (Desktop-Chrome), der Export ist ca. 3 MB groß.

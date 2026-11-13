@@ -130,6 +130,9 @@ async function renderWeek() {
     db.range('foodLog', 'date', ws, we), db.range('weights', 'date', prevWs, we), db.range('workouts', 'date', ws, we),
     db.range('sleep', 'date', ws, we), db.range('days', null, ws, we), db.range('sz', 'date', ws, we), db.range('events', 'date', ws, we),
   ]);
+  const [appts, todos] = await Promise.all([db.range('appointments', 'date', ws, we), db.all('todos')]);
+  const inW = (k) => k && k >= ws && k <= we;
+  const todosDone = todos.reduce((n, x) => n + (x.done && inW(x.doneDate) ? 1 : 0) + (x.history || []).filter((hh) => inW(hh.doneDate)).length, 0);
   const keys = Array.from({ length: 7 }, (_, i) => addDays(ws, i));
   const dm = weightDayValues(weights, state.settings.weightDayMode);
   const rows = keys.map((k) => {
@@ -193,6 +196,7 @@ async function renderWeek() {
       [h('span', 'Stimmung · Stress'), h('span', `${f1(mean(days.map((x) => x.mood)))} · ${f1(mean(days.map((x) => x.stress)))}`)],
       [h('span', `⭐ ${label}`), h('span', sz.length ? `${sz.length}× · Ø ${f1(mean(sz.map((x) => x.score)))}` : '–')],
       [h('span', 'Ereignisse'), h('span', events.length ? `${events.length}×` : '–')],
+      [h('span', '📅 Termine · ☑️ erledigt'), h('span', `${appts.length} · ${todosDone}`)],
       [h('span', '📓 Tagebuch'), h('span', `${days.filter((x) => x.note && x.note.trim()).length} von 7 Tagen`)])),
     h('div.card', table),
     events.length > 0 && h('div.card', h('div.card-head', h('span', '👥 Ereignisse')), events.sort((a, b) => a.date.localeCompare(b.date)).map((e) =>

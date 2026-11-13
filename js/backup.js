@@ -40,6 +40,7 @@ const isStr = (v, max = 500) => typeof v === 'string' && v.length <= max;
 const isNum = (v, lo, hi) => typeof v === 'number' && isFinite(v) && v >= lo && v <= hi;
 const optNum = (v, lo, hi) => v == null || isNum(v, lo, hi);
 const isTs = (v) => isNum(v, 0, 8.64e15);
+const isTime = (v) => v == null || (typeof v === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v));
 const is10 = (v) => v == null || (Number.isInteger(v) && v >= 1 && v <= 10);
 
 /** Feldprüfungen je Store; liefern Fehlertext oder null. */
@@ -59,6 +60,9 @@ const CHECK = {
   people: (r) => (!isStr(r.name, 200) ? 'name' : null),
   events: (r) => (!isValidKey(r.date) ? 'date' : !isStr(r.type || '', 200) ? 'type' : null),
   sz: (r) => (!isValidKey(r.date) ? 'date' : !is10(r.score) ? 'score' : null),
+  appointments: (r) => !isValidKey(r.date) ? 'date' : !isStr(r.title, 200) || !r.title ? 'title' : !isTime(r.time) || !isTime(r.endTime) ? 'zeit' : null,
+  todos: (r) => !isStr(r.title, 300) || !r.title ? 'title' : r.due != null && !isValidKey(r.due) ? 'due'
+    : r.repeat != null && (!['week', 'month'].includes(r.repeat.unit) || !Number.isInteger(r.repeat.interval) || r.repeat.interval < 1 || r.repeat.interval > 52 || !isValidKey(r.repeat.anchor)) ? 'repeat' : null,
 };
 
 /** Prüft und migriert ein geparstes Backup. Rückgabe {ok, errors[], data, counts}. */
@@ -124,7 +128,7 @@ function mergeSettings(inc) {
   return n;
 }
 
-const LABEL = { foods: 'Lebensmittel', foodLog: 'Essenseinträge', phases: 'Phasen', weights: 'Gewichtsmessungen', workouts: 'Sporteinheiten', exercises: 'Übungen', templates: 'Vorlagen', sleep: 'Schlafeinträge', days: 'Tageswerte/Tagebuch', people: 'Personen', events: 'Ereignisse', sz: '⭐-Einträge' };
+const LABEL = { foods: 'Lebensmittel', foodLog: 'Essenseinträge', phases: 'Phasen', weights: 'Gewichtsmessungen', workouts: 'Sporteinheiten', exercises: 'Übungen', templates: 'Vorlagen', sleep: 'Schlafeinträge', days: 'Tageswerte/Tagebuch', people: 'Personen', events: 'Ereignisse', sz: '⭐-Einträge', appointments: 'Termine', todos: 'Todos' };
 
 export async function importFile(file) {
   let obj;

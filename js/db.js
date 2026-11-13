@@ -2,12 +2,12 @@
 // IndexedDB-Version == Schema-Version. Jede Migration läuft genau einmal in onupgradeneeded.
 
 export const DB_NAME = 'lifetrack';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Alle Daten-Stores (für Export/Import). `meta` ist separat. */
 export const STORES = [
   'foods', 'foodLog', 'phases', 'weights', 'workouts', 'exercises', 'templates',
-  'sleep', 'days', 'people', 'events', 'sz',
+  'sleep', 'days', 'people', 'events', 'sz', 'appointments', 'todos',
 ];
 /** Stores, deren Schlüssel nicht `id` ist. */
 export const KEY_OF = { days: 'date', meta: 'key' };
@@ -36,11 +36,17 @@ const MIGRATIONS = {
     s('events', ['date', 'typeNorm']);
     s('sz', ['date']);
   },
+  // v2 (0.4.0): Termine und Todos
+  2(db) {
+    db.createObjectStore('appointments', { keyPath: 'id' }).createIndex('date', 'date');
+    db.createObjectStore('todos', { keyPath: 'id' }).createIndex('due', 'due');
+  },
 };
 
 /** Datensatz-Migrationen für importierte Exporte älterer Schema-Versionen. */
 export const RECORD_MIGRATIONS = {
-  // 2: (data) => { … data wird in-place auf Version 2 angehoben … },
+  // v1 → v2: neue Stores, bestehende Datensätze unverändert
+  2: (data) => { data.appointments ||= []; data.todos ||= []; },
 };
 
 let dbp = null;

@@ -1,12 +1,12 @@
 // settings.js – Tab „Einstellungen": Backup, Allgemein, Boulder-Skalen, Speicherstatus.
 import * as db from './db.js';
-import { state, changed, saveSettings, loadCaches } from './state.js';
+import { state, changed, saveSettings, loadCaches, nav } from './state.js';
 import { h, clear, sheet, toast, field, textInput, numInput, segmented, confirmSheet } from './ui.js';
 import { exportBackup, importFile } from './backup.js';
 import { parseNum, norm } from './stats.js';
 import { isStandalone } from './today.js';
 
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '0.4.0';
 
 function openScaleEditor(sc) {
   const S = state.settings;
@@ -62,6 +62,7 @@ export async function renderSettings(root) {
   });
 
   clear(root,
+    h('div.row.between', h('h2', 'Einstellungen'), h('button.btn.small.ghost', { onclick: () => nav.go('today') }, 'Fertig')),
     h('div.card',
       h('div.card-head', h('span', 'Backup')),
       h('p.sub', lastExport ? `Letzter Export: ${new Date(lastExport).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}` : 'Noch nie exportiert.'),

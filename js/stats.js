@@ -1,5 +1,5 @@
 // stats.js – reine Rechenfunktionen (ohne DOM/DB), in Node testbar.
-import { addDays, diffDays, weekStart } from './dates.js';
+import { addDays, diffDays, weekStart, parseKey, keyOf, weekdayName } from './dates.js';
 
 // --- Zahlen ---------------------------------------------------------------
 
@@ -250,4 +250,39 @@ export function prEvents(workouts) {
     best.set(it.exerciseId, { kg: Math.max(b?.kg || 0, mk), e1rm: Math.max(b?.e1rm || 0, me) });
   }
   return out;
+}
+
+// --- Wiederkehrende Todos -------------------------------------------------------------
+// repeat = { unit: 'week' | 'month', interval: n ≥ 1, anchor: 'YYYY-MM-DD', monthDay?: 1–31 }
+
+export const daysInMonth = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+
+/** k-te Wiederholung ab dem Anker (k = 0 → Anker selbst). Monatlich: 31. → letzter Tag kurzer Monate. */
+export function occurrence(r, k) {
+  if (r.unit === 'week') return addDays(r.anchor, 7 * r.interval * k);
+  const { y, m, d } = parseKey(r.anchor);
+  const mi = (m - 1) + r.interval * k;
+  const yy = y + Math.floor(mi / 12), mm = ((mi % 12) + 12) % 12 + 1;
+  return keyOf(yy, mm, Math.min(r.monthDay || d, daysInMonth(yy, mm)));
+}
+
+/** Erste Wiederholung, die strikt nach `key` liegt. */
+export function nextOccurrenceAfter(r, key) {
+  let k;
+  if (r.unit === 'week') k = Math.max(0, Math.floor(diffDays(r.anchor, key) / (7 * r.interval)));
+  else {
+    const a = parseKey(r.anchor), b = parseKey(key);
+    k = Math.max(0, Math.floor(((b.y - a.y) * 12 + (b.m - a.m)) / r.interval) - 1);
+  }
+  let o = occurrence(r, k);
+  while (o <= key) o = occurrence(r, ++k);
+  return o;
+}
+
+/** Klartext, z. B. „jeden Mo", „alle 2 Wochen (Fr)", „jeden Monat am 15.". */
+export function repeatLabel(r) {
+  if (!r) return '';
+  if (r.unit === 'week') return r.interval === 1 ? `jeden ${weekdayName(r.anchor)}` : `alle ${r.interval} Wochen (${weekdayName(r.anchor)})`;
+  const d = r.monthDay || parseKey(r.anchor).d;
+  return r.interval === 1 ? `jeden Monat am ${d}.` : `alle ${r.interval} Monate am ${d}.`;
 }

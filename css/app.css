@@ -223,3 +223,17 @@ textarea.inp.diary { min-height: 220px; font-size: 17px; line-height: 1.5; resiz
 .diary-card .big { color: var(--mu); font-size: 17px; font-weight: 500; }
 .btn.picker { position: relative; display: flex; align-items: center; justify-content: center; }
 .seg.top button { font-size: 13.5px; padding: 0 4px; }
+
+/* Planer */
+.todo { gap: 6px; }
+.tick { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+.tick::before { content: ''; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--mu); box-sizing: border-box; }
+.tick.on::before { display: none; }
+.tick.on { color: var(--ac-tx); background: radial-gradient(circle, var(--ac) 12px, transparent 13px); }
+.todo.done .name { text-decoration: line-through; color: var(--mu); }
+.sub.late { color: var(--warn); }
+.card.late-card { outline: 1px solid rgba(242,181,77,.45); }
+.card.today-card { outline: 1px solid var(--ac); }
+.ap-time { flex: none; width: 92px; white-space: nowrap; font-size: 13px; color: var(--ac); font-variant-numeric: tabular-nums; }
+.ivunit { color: var(--mu); }
+.row.gap > .inp[inputmode=numeric] { width: 80px; flex: none; }

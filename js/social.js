@@ -17,7 +17,7 @@ async function knownTypes() {
 
 // --- Personen-Auswahl (Chips, Mehrfachauswahl, Anlage inline) ------------------------------
 
-function personPicker(selected) {
+export function personPicker(selected) {
   const sel = new Set(selected || []);
   const box = h('div');
   const draw = () => {

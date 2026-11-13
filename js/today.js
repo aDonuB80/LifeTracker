@@ -1,6 +1,6 @@
 // today.js – Startscreen „Heute" und das zentrale „+"-Menü.
 import * as db from './db.js';
-import { state, today, dateNav } from './state.js';
+import { state, today, dateNav, nav } from './state.js';
 import { h, clear, sheet } from './ui.js';
 import { fmt, weightDayValues, rollingMean } from './stats.js';
 import { addDays, fmtDuration, timeOf, diffDays } from './dates.js';
@@ -10,6 +10,7 @@ import { openRunSheet, openBoulderSheet, openGymSheet, openWorkout, workoutSumma
 import { exportBackup } from './backup.js';
 import { openEventSheet, openStarSheet, peopleNames } from './social.js';
 import { openDiarySheet } from './diary.js';
+import { openTodoSheet, openAppointmentSheet, todoRow, appointmentRow, todosDueBy } from './planner.js';
 
 export function isStandalone() {
   return navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
@@ -30,6 +31,8 @@ export function openAddMenu() {
       tile('🙂', 'Stimmung', () => openMoodSheet()),
       tile('👥', 'Ereignis', () => openEventSheet()),
       tile('📓', 'Tagebuch', () => openDiarySheet()),
+      tile('📅', 'Termin', () => openAppointmentSheet()),
+      tile('☑️', 'Todo', () => openTodoSheet()),
       tile('⭐', '', () => openStarSheet()));
   });
 }
@@ -44,7 +47,8 @@ export async function renderToday(root) {
     db.get('days', key),
     db.getMeta('lastExportAt', null),
   ]);
-  const [events, stars] = await Promise.all([db.range('events', 'date', key), db.range('sz', 'date', key)]);
+  const [events, stars, appts, dueTodos] = await Promise.all([db.range('events', 'date', key), db.range('sz', 'date', key),
+    db.range('appointments', 'date', key), key === t ? todosDueBy(t) : Promise.resolve([])]);
   const dm = weightDayValues(weights, state.settings.weightDayMode);
   const wToday = dm.get(key);
   const m7 = rollingMean(dm, [key], 7, 3)[0];
@@ -52,8 +56,16 @@ export async function renderToday(root) {
 
   const mini = (title, main, sub, onclick) => h('button.card.mini', { onclick }, h('div.sub', title), h('div.big', main), sub && h('div.sub', sub));
 
-  const out = [dateNav()];
+  const out = [dateNav(h('button.icon-btn', { 'aria-label': 'Einstellungen', onclick: () => nav.go('settings') }, '⚙️'))];
   if (!isStandalone()) out.push(h('div.banner.warn', 'Hinweis: Du nutzt die App im Safari-Tab. Daten hier und in der Home-Bildschirm-App sind getrennt – bitte über „Zum Home-Bildschirm" installieren und nur dort eintragen.'));
+  // Planer: Termine des Tages + fällige/überfällige Todos (nur für heute)
+  if (appts.length || dueTodos.length) {
+    out.push(h('div.card',
+      h('div.card-head', h('span', '📅 Planer'), h('button.btn.small.ghost', { onclick: () => nav.go('planner') }, 'Alle')),
+      appts.sort((a, b) => (a.time || '').localeCompare(b.time || '')).map((a) => appointmentRow(a, t)),
+      dueTodos.slice(0, 8).map((x) => todoRow(x, t)),
+      dueTodos.length > 8 && h('p.hint', `+ ${dueTodos.length - 8} weitere fällige Todos`)));
+  }
   out.push(h('div', { onclick: () => openFoodSheet({ date: key }) }, nutritionCard(entries, key)));
   out.push(h('div.grid2',
     mini('⚖️ Gewicht', wToday != null ? `${fmt(wToday, 1)} kg` : 'eintragen', m7 != null ? `Ø7 ${fmt(m7, 1)} kg` : null, () => openWeightSheet()),
